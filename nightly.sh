@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd "`basename $0`"
+cd "`dirname $0`"
 fmt=.mobi
 base=/media/Kindle
 
