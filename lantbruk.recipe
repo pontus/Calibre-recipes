@@ -1,0 +1,43 @@
+
+__license__   = 'GPL v3'
+__copyright__ = '2009, Darko Miletic <darko.miletic at gmail.com>'
+'''
+dt.se
+'''
+from calibre.web.feeds.news import BasicNewsRecipe
+
+class lantbruk_se(BasicNewsRecipe):
+    title                 = 'Land Lantbruk/Skogsland'
+    __author__            = 'Darko Miletic'
+    description           = 'News from Sweden'
+    publisher             = 'Land'
+    category              = 'news, politics, Sweden'
+    oldest_article        = 2
+    delay                 = 1
+    max_articles_per_feed = 100
+    no_stylesheets        = True
+    use_embedded_content  = False
+    encoding              = 'utf-8'
+    language              = 'sv'
+
+    conversion_options = {
+                          'comment'   : description
+                        , 'tags'      : category
+                        , 'publisher' : publisher
+                        , 'language'  : language
+                        }
+
+    feeds = [
+               (u'Alla nyheter', u'http://www.lantbruk.com/path/*/*/feed')
+            ]
+
+    keep_only_tags = [dict(name='div', attrs={'id':'content'})]
+    remove_tags_before = dict(name='h1',attrs={'id':'article_title_stat'})
+    remove_tags_after = dict(name='div',attrs={'class':'article-image article-skribent'})
+    remove_tags = [
+                   
+        #dict(name='strong'),
+                  ]
+
+    
+    
