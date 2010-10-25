@@ -1,14 +1,14 @@
 #!/bin/sh
 
 cd "`dirname $0`"
+git pull
+
 fmt=.mobi
-base=/tmp/Kindle$$
-sudo rm -rf  "$base"
-sudo mkdir "$base"
+base=/media/Kindle
 
-sudo umount /dev/disk/by-label/Kindle
+umount /dev/disk/by-label/Kindle
 
-sudo mount /dev/disk/by-label/Kindle "$base" -o uid=`id -u`
+mount "$base"
 
 for p in *recipe; do 
   rm "$base/dagens_${p%.recipe}$fmt"
@@ -16,5 +16,4 @@ for p in *recipe; do
 
 done
 
-sudo umount "$base"
-sudo rm -rf "$base"
+umount "$base"
