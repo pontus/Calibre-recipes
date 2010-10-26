@@ -5,14 +5,14 @@ git pull
 
 fmt=.mobi
 base=/media/Kindle
+docbase=$base/documents/tidningar
 
-umount /dev/disk/by-label/Kindle
-
+umount "$base"
 mount "$base"
 
 for p in *recipe; do 
-  rm "$base/dagens_${p%.recipe}$fmt"
-  ebook-convert "$p" "$base/dagens_${p%.recipe}$fmt"
+  rm "$docbase/dagens_${p%.recipe}$fmt"
+  ebook-convert "$p" "$docbase/dagens_${p%.recipe}$fmt"
 
 done
 
