@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Check basic connectivity before we do anything
-ping www.google.com || exit 1
+ping -c 3 www.google.com || exit 1
 
 cd "`dirname $0`"
 git pull
