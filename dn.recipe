@@ -6,9 +6,12 @@ dn.se
 '''
 from calibre.web.feeds.news import BasicNewsRecipe
 
+import re
+import sys
+
 class DN_se(BasicNewsRecipe):
     title                 = 'Dagens Nyheter'
-    __author__            = 'Darko Miletic'
+    __author__            = 'Darko Miletic, fixes by Pontus Freyhult'
     description           = 'News from Sweden'
     publisher             = 'Dagens Nyheter'
     category              = 'news, politics, Sveden'
@@ -19,6 +22,7 @@ class DN_se(BasicNewsRecipe):
     use_embedded_content  = False
     encoding              = 'utf-8'
     language              = 'sv'
+    cover_url		  = 'http://www.dn.se/Images/Logos/dnse-medals.gif'
 
     conversion_options = {
                           'comment'   : description
@@ -27,20 +31,67 @@ class DN_se(BasicNewsRecipe):
                         , 'language'  : language
                         }
 
-    feeds = [
-               (u'Nyheter', u'http://www.dn.se/m/rss/toppnyheter')
-              ,(u'Ekonomi', u'http://www.dn.se/ekonomi-rss'      )
-              ,(u'Debatt' , u'http://www.dn.se/debatt-rss'       )
-              ,(u'Kultur' , u'http://www.dn.se/kultur-rss'       )
-            ]
+    def parse_index(self):
+        
+        soup = self.index_to_soup('http://www.dn.se/')
 
-    keep_only_tags = [dict(name='div', attrs={'id':'article'})]
-    remove_tags_before = dict(name='h1')
-    remove_tags_after = dict(name='div',attrs={'id':'byline'})
-    remove_tags = [
-                     dict(name=['object','link','base'])
-                    ,dict(name='div',attrs={'id':'hook'})
-                  ]
+        classre = re.compile('Standard')
+        hre = re.compile('^/')
+        d = {}
 
-    
+        sections = {}
+
+        for p in soup("a",{'href': hre, 'class': classre}):
+                link = 'http://www.dn.se/%s?rm=print' % str(p['href'][1:]).strip()
+
+                current_section = p['href'][1:1+p['href'][1:].find('/')].title()
+                s = str(p.string).strip()
+ 
+                articles = sections.setdefault(current_section,[])
+
+                if p.string and s!='ttp' and  s.find('img') == -1 and not d.has_key(link):
+                    d[link] = 1
+                    articles.append( {'title': s,
+                               'url': link,
+                               'date': '2011-01-01',
+                               'description': '',
+                               'contents': ''})
+
+        ret = []
+
+        for p in ('Chattar', 'Sport', 'Bostad', 'Webbtv'):
+            if sections.has_key(p):
+                del sections[p]
+
+        for p in sections.keys():
+            ret.append((p,sections[p]))
+                                           
+        
+        return ret
+
+    def postprocess_html(self,soup,first):
+        
+        # Remove these
+        for p in soup(lambda tag: tag.has_key('class') and tag['class'] in ('recommend', 
+                                                                            'article-addons', 
+                                                                            'box-toolbox',
+                                                                            'user-opinions opinions-visible',
+                                                                            'content-wrap',
+                                                                            'block block-share',
+                                                                            'block-inline first last',
+                                                                            'box-advert clear',
+                                                                            'borderless',
+                                                                            'hook-recommend')):
+            p.extract()
+
+
+
+        return soup("div",{'id':'article-content'})[0]
+        return soup
+        for p in soup("div"):
+            if p.has_key['id'] and p['id'] == 'article-content':
+                print p
+                return p
+
+        return soup
     
