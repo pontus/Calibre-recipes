@@ -1,0 +1,117 @@
+
+__license__   = 'GPL v3'
+__copyright__ = '2011, Pontus Freyhult'
+'''
+mongoliad.com
+'''
+from calibre.web.feeds.news import BasicNewsRecipe
+
+import re
+import os
+import sys
+import BeautifulSoup
+
+class Mongoliad_com(BasicNewsRecipe):
+    title                 = 'Mongoliad'
+    __author__            = 'Pontus Freyhult'
+    description           = ''
+    publisher             = ''
+    category              = 'story,community'
+    oldest_article        = 2
+    delay                 = 1
+    max_articles_per_feed = 100
+    no_stylesheets        = True
+    use_embedded_content  = False
+    encoding              = 'utf-8'
+    language              = 'en'
+    needs_subscription    = 'optional'
+
+    conversion_options = {
+                          'comment'   : description
+                        , 'tags'      : category
+                        , 'publisher' : publisher
+                        , 'language'  : language
+                        }
+			
+    def get_browser(self):
+        br = BasicNewsRecipe.get_browser()
+
+        username = self.username
+        password = self.password
+        
+
+        if username and password:
+            br.open('https://www.mongoliad.com/login')
+            
+            br.select_form(nr=0)
+            br['username']   = username
+            br['password'] = password
+            br.submit()
+        return br
+
+
+    def parse_index(self):
+        
+        soup = self.index_to_soup('http://mongoliad.com/contents')
+
+        
+        l = []
+
+        for p in soup("tr"):
+            try:
+                link = 'http://mongoliad.com%s' % str(p.td.a['href'])
+                title = p.td.a.contents[0]
+               
+                mtype = p('td')[1].contents[0]
+                desc = p('td')[2].contents[0]
+
+
+                l.append({'title': title,
+                          'url': link,
+                          'category': mtype,
+                          'description': desc})
+
+
+            except:
+                pass
+
+        return [('Content',l[:])]
+
+        
+
+                                           
+        
+        return ret
+
+    def postprocess_html(self,soup,first):
+        
+        # Remove these
+
+
+        if soup.button:
+            soup.button.extract()
+        
+        for p in soup("table"):
+            try:
+                if p['id'] == 'sharetable':
+                    p.extract()
+            except:
+                pass
+
+        box = soup("div","fancybox")[0]
+        box.h5.extract()
+        box.form.extract()
+
+        try:
+            while box.i:
+                p = box.i
+                newtag = BeautifulSoup.Tag(soup, "span", [("style", "font-style: italic;")])
+                newtag.insert(0, p.contents[0])
+                p.replaceWith(newtag)
+                
+        except e:
+            print e
+        
+
+        return box
+
