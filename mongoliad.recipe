@@ -75,7 +75,7 @@ class Mongoliad_com(BasicNewsRecipe):
             except:
                 pass
 
-        return [('Content',l[:])]
+        return [('Content',l)]
 
         
 
@@ -105,13 +105,15 @@ class Mongoliad_com(BasicNewsRecipe):
         try:
             while box.i:
                 p = box.i
-                newtag = BeautifulSoup.Tag(soup, "span", [("style", "font-style: italic;")])
-                newtag.insert(0, p.contents[0])
-                p.replaceWith(newtag)
-                
-        except e:
+                newtag = BeautifulSoup.Tag(soup, "span", {"style": "font-style: italic;"})
+		newtag.insert(0, str(p.contents[0]))
+		p.replaceWith(str(newtag))
+
+
+        except Exception,e:
             print e
         
+
 
         return box
 
