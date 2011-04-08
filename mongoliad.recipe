@@ -75,7 +75,7 @@ class Mongoliad_com(BasicNewsRecipe):
             except:
                 pass
 
-        return [('Content',l)]
+        return [('Content',l[:6])]
 
         
 
@@ -103,6 +103,18 @@ class Mongoliad_com(BasicNewsRecipe):
         box.form.extract()
 
         try:
+
+
+	    while box.a:
+                p = box.a
+                s = ''
+                if p.contents:
+                    s = p.contents[0]
+
+                p.replaceWith(s)
+
+
+
             while box.i:
                 p = box.i
                 newtag = BeautifulSoup.Tag(soup, "span", {"style": "font-style: italic;"})
@@ -111,7 +123,7 @@ class Mongoliad_com(BasicNewsRecipe):
 
 
         except Exception,e:
-            print e
+            print "Fel" + e
         
 
 
