@@ -75,7 +75,7 @@ class Mongoliad_com(BasicNewsRecipe):
             except:
                 pass
 
-        return [('Content',l[:6])]
+        return [('Content',l)]
 
         
 
