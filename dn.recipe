@@ -84,13 +84,23 @@ class DN_se(BasicNewsRecipe):
             p.extract()
 
 
+        while soup.a:
+            p = soup.a
+            s = ''
+            if p.contents:
+                s = p.contents[0]
+
+            p.replaceWith(s)
+
+        while soup.h2:
+            p = soup.h2
+            p.extract()
+
+        while soup.h3:
+            p = soup.h3
+            p.extract()
+
 
         return soup("div",{'id':'article-content'})[0]
-        return soup
-        for p in soup("div"):
-            if p.has_key['id'] and p['id'] == 'article-content':
-                print p
-                return p
 
-        return soup
     
