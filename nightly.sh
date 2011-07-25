@@ -46,5 +46,9 @@ while [ "x$done" != xyes ]; do
   fi
 done
 
+readpid=`/usr/local/android/android-sdk-linux_x86/platform-tools/adb shell ps | fgrep -i com.bn.nook.reader.activities | awk '{print $2;}'`
+/usr/local/android/android-sdk-linux_x86/platform-tools/adb shell kill -9 $readpid
+
+
 rm -rf "$docbase"
 
