@@ -24,7 +24,7 @@ runs=0
 
 while [ "x$done" != xyes ]; do
  
-  if /usr/local/android/android-sdk-linux_x86/platform-tools/adb connect 192.168.15.143:5555; then
+  if /usr/local/android/android-sdk-linux_x86/platform-tools/adb connect 192.168.20.143:5555; then
     tr=yes
     for p in *; do
       if /usr/local/android/android-sdk-linux_x86/platform-tools/adb push "$p" "$remotebase"; then
