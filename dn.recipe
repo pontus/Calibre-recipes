@@ -79,9 +79,16 @@ class DN_se(BasicNewsRecipe):
                                                                             'block block-share',
                                                                             'block-inline first last',
                                                                             'box-advert clear',
+									    'type-account',
+									    'login-form',
+									    'socialtabs',
+									    'article-readmore',
                                                                             'borderless',
                                                                             'hook-recommend')):
             p.extract()
+
+
+	    
 
 
         while soup.a:
@@ -91,6 +98,15 @@ class DN_se(BasicNewsRecipe):
                 s = p.contents[0]
 
             p.replaceWith(s)
+
+        while soup.strong:
+            p = soup.strong
+            s = ''
+            if p.contents:
+                s = p.contents[0]
+
+            p.replaceWith(s)
+
 
         while soup.h2:
             p = soup.h2
