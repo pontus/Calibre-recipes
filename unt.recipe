@@ -1,0 +1,178 @@
+
+__license__   = 'GPL v3'
+__copyright__ = '2011, Pontus Freyhult'
+'''
+unt.se
+'''
+from calibre.web.feeds.news import BasicNewsRecipe
+
+import re
+import sys
+
+class UNT_se(BasicNewsRecipe):
+    title                 = 'UNT'
+    __author__            = 'Darko Miletic, fixes by Pontus Freyhult'
+    description           = 'Uppsala news'
+    publisher             = 'Uppsala Nya Tidning'
+    category              = 'news, politics, Sveden'
+    oldest_article        = 2
+    delay                 = 1
+    max_articles_per_feed = 100
+    no_stylesheets        = True
+    use_embedded_content  = False
+    encoding              = 'iso-8859-1'
+    language              = 'sv'
+    #cover_url		  = 'http://www.dn.se/Images/Logos/dnse-medals.gif'
+
+    conversion_options = {
+                          'comment'   : description
+                        , 'tags'      : category
+                        , 'publisher' : publisher
+                        , 'language'  : language
+                        }
+
+    def parse_index(self):
+        
+        soupfp = self.index_to_soup('http://www.unt.se/')
+        soupsunnersta = self.index_to_soup('http://www.unt.se/uppsala/sunnersta')
+
+	#        classre = re.compile('Standard')
+        hre = re.compile('^.*aspx$')
+        d = {}
+
+        sections = {}
+
+        soups = soupfp("a",{'href': hre}) + soupsunnersta("a",{'href': hre})
+        
+
+        for p in soups:
+
+                h  = p['href']
+
+                if h[:7] == "http://":
+                    link = h
+                    h = h[6:]
+                else:
+                    if h[:6] == "../../":
+                        h = h[6:]
+
+                    if h[0] == "/":
+                        h = h[1:]
+                    
+                    link = 'http://www.unt.se/%s' % str(h).strip()
+
+
+                leftmost = h.find('/')
+
+
+
+                current_section = h[:h[1:].find('/')+1].title()
+
+                if current_section[0] == '/':
+                    current_section = current_section
+
+
+                s = str(p.string).strip()
+ 
+                articles = sections.setdefault(current_section,[])
+
+                if p.string and not d.has_key(link):
+                    d[link] = 1
+                    articles.append( {'title': s,
+                               'url': link,
+                               'date': '2011-01-01',
+                               'description': '',
+                               'contents': ''})
+
+
+
+
+        ret = []
+
+        for p in ('Chattar', 'Sport', 'Bostad', 'Webbtv','Www.unt.se','Startsidan','Bostadsguiden','/Www.Unt.Se','Kundservice'):
+            if sections.has_key(p):
+                del sections[p]
+
+        for p in sections.keys():
+            ret.append((p,sections[p]))
+                                           
+
+        return ret
+
+    def postprocess_html(self,soup,first):
+        
+        # Remove these
+        for p in soup(lambda tag: tag.has_key('id') and tag['id'] in ('rightarea',
+                                                                      'annonsarea',
+                                                                      'footer',
+                                                                      'artkommentarer',
+                                                                      'loginbox',
+                                                                      'registerbox',
+                                                                      'forgotpasswordbox',
+                                                                      'articleNavigation',
+                                                                      'kommentarerstart',
+                                                                      'topbanner',
+                                                                      'art_head',
+                                                                      'expandKommen',
+                                                                      'printtext')):
+            p.extract()
+
+
+        for p in soup(lambda tag: tag.has_key('class') and tag['class'] in ('header',
+                                                                            'puff',
+                                                                            'breadcrums',
+                                                                            'relaterade_item',
+                                                                            'topicrub',
+                                                                            'artkommentarer',
+                                                                            'articlebanner',
+                                                                            'blockpuff',
+                                                                            'art_buttons',
+                                                                            'art_links',
+                                                                            'pufflinks',
+                                                                            'relrub',
+                                                                            'commentlinks',
+                                                                            'fotboxrad',
+                                                                            )):
+            p.extract()
+
+
+        for p in soup.img:
+            sys.stderr.write("Bild " +str(p))
+            
+            if p.src[-13:] == "dot_clear.gif":
+                p.extract()
+
+
+	    
+
+
+        while soup.a:
+            p = soup.a
+            s = ''
+            if p.contents:
+                s = p.contents[0]
+
+            p.replaceWith(s)
+
+        while soup.strong:
+            p = soup.strong
+            s = ''
+            if p.contents:
+                s = p.contents[0]
+
+            p.replaceWith(s)
+
+
+        while soup.h2:
+            p = soup.h2
+            p.extract()
+
+        while soup.h3:
+            p = soup.h3
+            p.extract()
+
+
+
+        return soup("div",{'id':'main'})[0]
+
+    
